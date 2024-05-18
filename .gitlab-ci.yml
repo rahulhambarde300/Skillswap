@@ -1,0 +1,84 @@
+variables:
+  DOCKER_DRIVER: overlay2
+  IMAGE_NAME: w24asdcgroup14/skillswap
+  FRONTEND_IMAGE_NAME: w24asdcgroup14/skillswap-frontend
+
+stages:
+  - test
+  - build
+  - quality
+  - publish
+  - deploy
+
+run-tests:
+  image: maven:latest
+  stage: test
+  script:
+    - cd skillswap
+    - mvn test -Dactive.profile=prod
+  
+quality:
+  stage: quality
+  image: openjdk:11
+  script:
+    - echo "Compiling the project"
+    - mkdir code_smells/
+    - java -jar $CI_PROJECT_DIR/skillswap/DesigniteJava.jar -i $CI_PROJECT_DIR/skillswap -o $CI_PROJECT_DIR/code_smells/ -d 
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/code_smells/*.csv
+    expire_in: 1 week
+
+
+build:
+  image: maven:latest
+  stage: build
+  script:
+    - cd skillswap
+    - echo "Compilation in progress.."
+    - mvn clean package -Dactive.profile=prod
+  artifacts:
+    paths: 
+      - $CI_PROJECT_DIR/skillswap/target/*.jar
+
+
+publish-build:
+  image: docker:latest
+  stage: publish
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: "tcp://docker:2375"
+  services:
+    - name: docker:dind
+  before_script:
+    - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD docker.io
+  script:
+    - cd skillswap
+    - echo "Publishing backend in progress."
+    - docker build -t $IMAGE_NAME . -f Dockerfile
+    - docker push $IMAGE_NAME
+    - echo "Backend application published successfully."
+    - cd ../skillswap-frontend
+    - echo "Publishing backend in progress."
+    - docker build -t $FRONTEND_IMAGE_NAME . -f Dockerfile
+    - docker push $FRONTEND_IMAGE_NAME
+    - echo "Frontend application published successfully."
+  only:
+    - main  
+
+
+
+
+deploy:
+  image: alpine:latest
+  stage: deploy
+  script:
+    - chmod og= $ID_RSA
+    - apk update && apk add openssh-client
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u $DOCKER_USER -p $DOCKER_PASSWORD docker.io"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker stop skillswap || true && docker stop skillswap-frontend || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker rm skillswap || true && docker rm skillswap-frontend || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker-compose down && docker rmi -f $IMAGE_NAME || true && docker rmi -f $FRONTEND_IMAGE_NAME || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker-compose up -d"
+  only:
+    - main

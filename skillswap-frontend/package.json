@@ -1,0 +1,48 @@
+{
+  "name": "skill-swap-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:deploy": "env-cmd -f .env.deploy next dev",
+    "build": "env-cmd -f .env.deploy next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.11",
+    "@mui/joy": "^5.0.0-beta.30",
+    "@upstash/redis": "^1.28.4",
+    "@mui/material": "^5.15.14",
+    "@upstash/redis": "^1.28.4",
+    "axios": "^1.6.7",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "date-fns": "^3.6.0",
+    "env-cmd": "^10.1.0",
+    "flowbite": "^2.3.0",
+    "lucide-react": "^0.363.0",
+    "nanoid": "^5.0.6",
+    "next": "14.1.0",
+    "pusher": "^5.2.0",
+    "pusher-js": "^8.4.0-rc2",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hot-toast": "^2.4.1",
+    "react-loading-skeleton": "^3.4.0",
+    "react-textarea-autosize": "^8.5.3",
+    "sharp": "^0.33.3",
+    "tailwind-merge": "^2.2.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.28",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1"
+  }
+}

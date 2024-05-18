@@ -1,0 +1,15 @@
+version: '1'
+name: skillswap
+services:
+  frontend:
+    image: "w24asdcgroup14/skillswap-frontend"
+    ports:
+      - "3000:3000"
+    container_name: "skillswap-frontend"
+  backend:
+    image: "w24asdcgroup14/skillswap"
+    ports:
+      - "8000:8000"
+    container_name: "skillswap"
+volumes:
+  db-data:
